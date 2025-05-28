@@ -89,9 +89,6 @@ Launch the Streamlit app and interact with the chatbot using natural language qu
 
 - "What is the hottest room in the afternoon time?"
 - "How many sensors are there on each floor and what types are they?"
-- "Which floor has the highest average CO2 levels during working hours?"
-- "Which rooms have the most motion detection in the morning?"
-- "Show me light level patterns across different rooms during working hours."
 
 ### Data Overview
 Click the "📊 View Dataset Overview" button to explore:
@@ -101,14 +98,6 @@ Click the "📊 View Dataset Overview" button to explore:
 - Statistical summaries
 - Sensor type descriptions
 
-### Programmatic Usage
-```python
-from langgraph_agent_module import query_building_agent
-
-# Query the agent
-result = query_building_agent("What's the temperature in room 413?")
-print(result)
-```
 
 ## Example Queries
 
