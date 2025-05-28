@@ -1,5 +1,11 @@
 # LangGraph Agent for Digital Twin
 
+## 🚀 **[Live Demo - Try It Now!](https://hansin2901-digital-twin-langgraph-agent-app-9q5e6p.streamlit.app/)**
+
+> **🎯 Interactive Streamlit Application** - Experience the LangGraph Digital Twin agent in action! Query building sensor data using natural language and explore comprehensive data visualizations.
+
+---
+
 A prototype implementation of an LLM-based query system for data analysis, particularly designed for digital twin applications. This project demonstrates how to build a structured, scalable system using LangGraph to query multiple databases and provide intelligent responses about building sensor data.
 
 ## Overview
