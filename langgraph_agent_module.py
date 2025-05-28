@@ -654,6 +654,13 @@ def create_building_query_agent():
 building_agent = create_building_query_agent()
 print("Building Query Agent created successfully!")
 
+# Function to return the Mermaid diagram of the LangGraph workflow
+def get_mermaid_diagram():
+    """
+    Return the Mermaid diagram for the LangGraph agent workflow.
+    """
+    return building_agent.to_mermaid()
+
 # %%
 def query_building_agent(query: str, verbose: bool = True) -> Dict[str, Any]:
     """
@@ -890,5 +897,74 @@ def get_agent_status():
 def get_graph():
     """Return the compiled LangGraph agent for use in Streamlit app."""
     return building_agent
+
+import streamlit as st
+
+def show_data_overview_modal():
+    """
+    Display a modal (popup) with informative diagrams and a schematic about the dataset.
+    """
+    with st.popover("📊 Data Overview & Building Structure", use_container_width=True):
+        st.markdown("## 📊 Data Overview & Building Structure")
+        st.markdown("""
+        These diagrams help you understand the structure and content of the UC Berkeley Smart Building dataset.
+        """)
+        # Diagram 1: Sensor Distribution by Type
+        st.markdown("**Sensor Distribution by Type**")
+        st.caption("This bar chart shows the number of sensors by type (Temperature, Light, CO₂, Motion) across the entire smart building.")
+        st.pyplot(sensor_distribution_plot())
+        st.divider()
+        # Diagram 2: Data Coverage Over Time
+        st.markdown("**Data Coverage Over Time**")
+        st.caption("This line plot shows the number of sensor readings recorded each hour, illustrating the density and continuity of data collection over time.")
+        st.pyplot(data_coverage_plot())
+        st.divider()
+        # Diagram 3: Sample Sensor Readings (Box Plot)
+        st.markdown("**Distribution of Sensor Readings by Type**")
+        st.caption("This box plot shows the distribution of sensor readings by type, helping identify typical ranges and outliers.")
+        st.pyplot(sensor_boxplot())
+        st.divider()
+        # Schematic: Building and Sensor Layout (Mermaid.js)
+        st.markdown("**Building and Sensor Layout (Schematic)**")
+        st.caption("This schematic shows the building's structure, including all floors, rooms, and the sensors installed in each room.")
+        st.markdown(
+            '''```mermaid\ngraph TD\n  B[Building] --> F4[Floor 4]\n  B --> F5[Floor 5]\n  B --> F6[Floor 6]\n\n  F4 --> R413_4[Room 413]\n  F4 --> R415_4[Room 415]\n  F4 --> R417_4[Room 417]\n  F5 --> R513_5[Room 513]\n  F5 --> R515_5[Room 515]\n  F5 --> R517_5[Room 517]\n  F6 --> R613_6[Room 613]\n  F6 --> R615_6[Room 615]\n  F6 --> R617_6[Room 617]\n\n  classDef sensor fill:#f9f,stroke:#333,stroke-width:1px;\n  class R413_4,R415_4,R417_4,R513_5,R515_5,R517_5,R613_6,R615_6,R617_6 sensor;\n\n  R413_4 -->|T1| Temp1\n  R413_4 -->|L1| Light1\n  R413_4 -->|C1| CO2_1\n  R413_4 -->|M1| Motion1\n  %% Repeat similarly for other rooms...\n```''',
+            unsafe_allow_html=True
+        )
+
+# Helper plotting functions for Streamlit
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+def sensor_distribution_plot():
+    sensor_counts = time_series_df.groupby('sensor_type')['sensor_id'].nunique()
+    fig, ax = plt.subplots()
+    sensor_counts.plot(kind='bar', ax=ax)
+    ax.set_title("Sensor Distribution by Type")
+    ax.set_xlabel("Sensor Type")
+    ax.set_ylabel("Number of Unique Sensors")
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=0)
+    plt.tight_layout()
+    return fig
+
+def data_coverage_plot():
+    ts = pd.to_datetime(time_series_df['timestamp'])
+    readings_per_hour = time_series_df.set_index(ts).resample('H').size()
+    fig, ax = plt.subplots()
+    readings_per_hour.plot(ax=ax)
+    ax.set_title("Sensor Data Coverage Over Time")
+    ax.set_xlabel("Time")
+    ax.set_ylabel("Number of Readings per Hour")
+    plt.tight_layout()
+    return fig
+
+def sensor_boxplot():
+    fig, ax = plt.subplots(figsize=(8, 5))
+    sns.boxplot(x='sensor_type', y='sensor_reading', data=time_series_df, ax=ax)
+    ax.set_title("Distribution of Sensor Readings by Type")
+    ax.set_xlabel("Sensor Type")
+    ax.set_ylabel("Sensor Reading")
+    plt.tight_layout()
+    return fig
 
 

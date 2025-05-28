@@ -15,6 +15,11 @@ graph = get_graph()
 
 st.title("🤖 LangGraph Chatbot")
 
+# Add user guidance note about query errors
+st.info("""
+If your response looks like there was an error in the query, try entering the same prompt a few times. Sometimes the agent may need a retry to process your request correctly.
+""")
+
 # Utility for rerun (Streamlit 1.32+ uses st.rerun, fallback to st.experimental_rerun)
 def safe_rerun():
     try:
