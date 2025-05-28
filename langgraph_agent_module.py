@@ -7,10 +7,12 @@
 
 # %%
 # Import required libraries
+import streamlit as st
 import os
 import json
 import pandas as pd
 import numpy as np
+import zipfile
 from datetime import datetime, timedelta
 from typing import Dict, List, Any, Optional, Literal
 from dataclasses import dataclass
@@ -26,23 +28,22 @@ from typing_extensions import Annotated, TypedDict
 
 # Neo4j and data handling
 from neo4j import GraphDatabase
-from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv()
-
-print("All libraries imported successfully!")
 
 # %%
-# Configuration for the LLM and Neo4j
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-print(OPENAI_API_KEY)
-OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
+# Configuration for the LLM and Neo4j using Streamlit secrets
+OPENAI_API_KEY = st.secrets["OPENAI_API_KEY"]
+OPENAI_BASE_URL = st.secrets.get("OPENAI_BASE_URL", "https://api.openai.com/v1")
+NEO4J_URI = st.secrets.get("NEO4J_URI", "bolt://localhost:7687")
+NEO4J_USER = st.secrets.get("NEO4J_USER", "neo4j")
+NEO4J_PASSWORD = st.secrets.get("NEO4J_PASSWORD", "password")
 
-# Neo4j configuration
-NEO4J_URI = os.getenv("NEO4J_URI", "bolt://localhost:7687")
-NEO4J_USER = os.getenv("NEO4J_USER", "neo4j")
-NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "password")
+# Load the UC Berkeley time series data, extracting from ZIP if needed
+csv_path = "uc_berkeley_processed_data_graph_compatible.csv"
+zip_path = "uc_berkeley_processed_data_graph_compatible.zip"
+if not os.path.exists(csv_path) and os.path.exists(zip_path):
+    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+        zip_ref.extractall()
+time_series_df = pd.read_csv(csv_path)
 
 # Initialize the LLM
 llm = ChatOpenAI(
