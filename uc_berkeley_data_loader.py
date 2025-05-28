@@ -30,7 +30,7 @@ def load_real_uc_berkeley_data(
         DataFrame with columns: timestamp, sensor_reading, sensor_id
     """
     
-    print(f"🏢 Loading Real UC Berkeley Smart Building System Dataset...")
+    print(f"Loading Real UC Berkeley Smart Building System Dataset...")
     print(f"   Dataset path: {dataset_path}")
     print(f"   ID mapping CSV: {id_mapping_csv}")
     
@@ -66,7 +66,7 @@ def load_real_uc_berkeley_data(
     
     print(f"   Rooms from id_mapping.csv found in dataset: {sorted(available_rooms)}")
     if missing_rooms:
-        print(f"   ⚠️  Rooms from id_mapping.csv NOT found in dataset: {sorted(missing_rooms)}")
+        print(f"   Rooms from id_mapping.csv NOT found in dataset: {sorted(missing_rooms)}")
     
     # Show what sensor IDs will be generated for each room (to match graph database)
     print(f"\n🔗 Sensor ID Generation Preview (Graph Database Compatible):")
@@ -98,7 +98,7 @@ def load_real_uc_berkeley_data(
         
         # Check if room directory exists in dataset
         if not os.path.exists(room_path):
-            print(f"   ⚠️  Room directory {original_room} not found in dataset, skipping...")
+            print(f"   Room directory {original_room} not found in dataset, skipping...")
             continue
         
         print(f"   Processing room {original_room} -> Floor {room_info['floor']}, Base ID: {room_info['base_id']}")
@@ -109,7 +109,7 @@ def load_real_uc_berkeley_data(
             csv_path = os.path.join(room_path, f"{sensor_file}.csv")
             
             if not os.path.exists(csv_path):
-                print(f"     ⚠️  Missing {sensor_file}.csv in {original_room}")
+                print(f"     Missing {sensor_file}.csv in {original_room}")
                 sensor_index += 1  # Still increment to maintain ID consistency
                 continue
                 
@@ -145,10 +145,10 @@ def load_real_uc_berkeley_data(
                 
                 all_data.append(processed_df)
                 
-                print(f"     ✅ {sensor_type} (ID: {sensor_id}): {len(processed_df)} records")
+                print(f"      {sensor_type} (ID: {sensor_id}): {len(processed_df)} records")
                 
             except Exception as e:
-                print(f"     ❌ Error processing {sensor_file}.csv: {e}")
+                print(f"      Error processing {sensor_file}.csv: {e}")
             finally:
                 sensor_index += 1  # Always increment to maintain consistent ID sequence
     
@@ -162,24 +162,24 @@ def load_real_uc_berkeley_data(
     # Save as CSV if path provided
     if output_csv_path:
         final_df.to_csv(output_csv_path, index=False)
-        print(f"📁 Saved processed data to: {output_csv_path}")
-    print(f"\n📊 Dataset Loading Summary:")
+        print(f"Saved processed data to: {output_csv_path}")
+    print(f"\nDataset Loading Summary:")
     print(f"   Total records: {len(final_df):,}")
     print(f"   Unique sensors: {final_df['sensor_id'].nunique()}")
     print(f"   Time range: {final_df['timestamp'].min()} to {final_df['timestamp'].max()}")
     print(f"   Duration: {final_df['timestamp'].max() - final_df['timestamp'].min()}")
       # Show sensor distribution
-    print(f"\n📈 Sensor Distribution:")
+    print(f"\nSensor Distribution:")
     sensor_counts = final_df['sensor_id'].value_counts()
     for sensor_id, count in sensor_counts.head(15).items():  # Show more sensors
         print(f"   {sensor_id}: {count:,} records")
     
     # Show sample data
-    print(f"\n🔍 Sample Data (Graph Database Compatible Schema):")
+    print(f"\nSample Data (Graph Database Compatible Schema):")
     print(final_df.head(10).to_string(index=False))
     
     # Show sensor ID format verification
-    print(f"\n🔗 Sensor ID Format Verification:")
+    print(f"\nSensor ID Format Verification:")
     unique_sensors = final_df['sensor_id'].unique()
     print(f"   Sample sensor IDs: {sorted(unique_sensors)}")
     
@@ -188,9 +188,9 @@ def load_real_uc_berkeley_data(
     actual_columns = set(final_df.columns)
     
     if expected_columns == actual_columns:
-        print(f"\n✅ Schema validation passed! Compatible with graph database.")
+        print(f"\n Schema validation passed! Compatible with graph database.")
     else:
-        print(f"\n❌ Schema validation failed!")
+        print(f"\nSchema validation failed!")
         print(f"   Expected: {expected_columns}")
         print(f"   Actual: {actual_columns}")
     
@@ -260,47 +260,47 @@ def validate_real_dataset_schema(df: pd.DataFrame) -> bool:
     actual_columns = set(df.columns)
     
     if expected_columns != actual_columns:
-        print(f"❌ Column mismatch: Expected {expected_columns}, got {actual_columns}")
+        print(f"Column mismatch: Expected {expected_columns}, got {actual_columns}")
         return False
     
     # Check data types
     if not pd.api.types.is_datetime64_any_dtype(df['timestamp']):
-        print(f"❌ Timestamp column is not datetime: {df['timestamp'].dtype}")
+        print(f" Timestamp column is not datetime: {df['timestamp'].dtype}")
         return False
     
     if not pd.api.types.is_numeric_dtype(df['sensor_reading']):
-        print(f"❌ Sensor reading column is not numeric: {df['sensor_reading'].dtype}")
+        print(f"Sensor reading column is not numeric: {df['sensor_reading'].dtype}")
         return False
     
     # Check sensor_id format (should match graph database format: [letter][number])
     sample_ids = df['sensor_id'].head(10).tolist()
     for sensor_id in sample_ids:
         if not (len(sensor_id) >= 2 and sensor_id[0].isalpha() and sensor_id[1:].isdigit()):
-            print(f"❌ Invalid sensor_id format: {sensor_id} (expected format: [letter][number], e.g., t5, l6)")
+            print(f"Invalid sensor_id format: {sensor_id} (expected format: [letter][number], e.g., t5, l6)")
             return False
     
     # Check sensor types match graph database schema
     valid_sensor_types = {'tempreture', 'light', 'co2', 'motion'}
     actual_sensor_types = set(df['sensor_type'].unique())
     if not actual_sensor_types.issubset(valid_sensor_types):
-        print(f"❌ Invalid sensor types: {actual_sensor_types - valid_sensor_types}")
+        print(f"Invalid sensor types: {actual_sensor_types - valid_sensor_types}")
         print(f"   Valid types: {valid_sensor_types}")
         return False
     
     # Check for reasonable data ranges by sensor type
     sensor_stats = df.groupby('sensor_type')['sensor_reading'].agg(['min', 'max', 'mean'])
-    print("📊 Sensor Reading Ranges by Type:")
+    print(" Sensor Reading Ranges by Type:")
     for sensor_type, stats in sensor_stats.iterrows():
         print(f"   {sensor_type}: {stats['min']:.1f} to {stats['max']:.1f} (avg: {stats['mean']:.1f})")
     
-    print("✅ Schema validation passed! Data is compatible with graph database schema.")
+    print("Schema validation passed! Data is compatible with graph database schema.")
     return True
 
 
 if __name__ == "__main__":
     """Test the real data loader with graph database compatible schema"""
     
-    print("🚀 Testing Real UC Berkeley Dataset Loader - Graph Database Compatible")
+    print("Testing Real UC Berkeley Dataset Loader - Graph Database Compatible")
     print("="*70)
     
     try:
@@ -318,17 +318,17 @@ if __name__ == "__main__":
         # Get building structure
         building_structure = get_building_structure_from_real_data()
         
-        print(f"\n🏗️ Building Structure (from id_mapping.csv):")
+        print(f"\n Building Structure (from id_mapping.csv):")
         for floor, rooms in building_structure['floors'].items():
             room_numbers = [r['room_number'] for r in rooms]
             base_ids = [r['base_id'] for r in rooms]
-            print(f"   Floor {floor}: Rooms {room_numbers} (Base IDs: {base_ids})")
+            print(f"Floor {floor}: Rooms {room_numbers} (Base IDs: {base_ids})")
         
-        print(f"\n🔗 Sensor Types: {building_structure['sensor_types']}")
+        print(f"\nSensor Types: {building_structure['sensor_types']}")
         
-        print(f"\n🎉 Graph database compatible dataset loading completed successfully!")
-        print(f"✅ Ready for Neo4j graph database integration")
-        print(f"📁 CSV saved to: {output_csv}")
+        print(f"\nGraph database compatible dataset loading completed successfully!")
+        print(f"Ready for Neo4j graph database integration")
+        print(f"CSV saved to: {output_csv}")
         
         # Show sample sensor IDs that match graph database format
         print(f"\n🆔 Sample Sensor IDs (Graph Database Compatible):")
@@ -338,6 +338,6 @@ if __name__ == "__main__":
             print(f"   {sensor_id} ({sensor_type})")
         
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"Error: {e}")
         import traceback
         traceback.print_exc()
