@@ -1,5 +1,5 @@
 import streamlit as st
-from langgraph_agent_module import get_graph, query_building_agent, time_series_df, get_mermaid_diagram
+from langgraph_agent_module import get_graph, query_building_agent, time_series_df
 import time
 
 # Optional imports for data visualization
@@ -235,43 +235,6 @@ for i, (col, query) in enumerate(zip(cols, example_queries)):
                     if latency is not None:
                         st.caption(f"⏱️ Latency: {latency:.2f} seconds")
             safe_rerun()
-
-# Bonus: Mermaid.js graph visualization
-with st.expander("🗺️ View LangGraph Structure (Mermaid.js)"):
-    try:
-        mermaid_diagram = get_mermaid_diagram()
-        if mermaid_diagram:
-            st.markdown(f"""
-            ```mermaid
-            {mermaid_diagram}
-            ```
-            """, unsafe_allow_html=True)
-        else:
-            raise ValueError("No mermaid diagram available")
-    except Exception as e:
-        st.info("Mermaid.js visualization is not available for this graph.\n\nIf you want to visualize your LangGraph, ensure your graph object implements a .to_mermaid() method that returns a valid Mermaid diagram string.\n\nExample:")
-        st.markdown(
-            """
-            ```mermaid
-            graph TD
-                Start --> DecideStrategy[Decide Strategy]
-                DecideStrategy --> GenerateQueries[Generate Queries]
-                GenerateQueries --> ExecuteQueries[Execute Queries]
-                ExecuteQueries --> GenerateAnswer[Generate Answer]
-                GenerateAnswer --> End
-                
-                classDef startEnd fill:#e1f5fe
-                classDef process fill:#f3e5f5
-                classDef decision fill:#fff3e0
-                
-                class Start,End startEnd
-                class DecideStrategy decision
-                class GenerateQueries,ExecuteQueries,GenerateAnswer process
-            ```
-            """,
-            unsafe_allow_html=True
-        )
-        st.caption("This is the actual LangGraph workflow structure for the UC Berkeley Smart Building Agent.")
 
 # Bonus: Debug/info expander
 with st.expander("🪲 Debug / Info"):
